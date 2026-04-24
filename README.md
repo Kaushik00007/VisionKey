@@ -42,29 +42,3 @@ python main.py
 
 The application will be running at `http://127.0.0.1:8000`. The frontend is served automatically at the root `/`.
 
-## Deployment
-
-### Deploying to Render
-1. Connect your GitHub repository to Render.
-2. Select **Web Service**.
-3. Build Command: `pip install -r requirements.txt`
-4. Start Command: `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
-5. Note: Make sure the server has `ffmpeg` and `tesseract-ocr` installed. For Render, you may need a Dockerfile or standard environment setup that includes these apt packages.
-
-### Deploying to Railway
-1. Push to GitHub and link to Railway.
-2. Railway will automatically detect Python.
-3. Configure the Start Command to `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`.
-4. Add the `apt` nixpacks builder to install system packages:
-   Add a `nixpacks.toml` at the root:
-   ```toml
-   [phases.setup]
-   aptPkgs = ["ffmpeg", "tesseract-ocr"]
-   ```
-
-### Deploying to VPS
-1. SSH into VPS.
-2. Install dependencies: `sudo apt update && sudo apt install -y python3-pip python3-venv ffmpeg tesseract-ocr`
-3. Setup virtual environment, clone repo, and install requirements.
-4. Use `systemd` and `gunicorn` (with uvicorn workers) or `pm2` to run the FastAPI app continually.
-5. Setup Nginx to reverse proxy port 80/443 to the local `8000` port.
