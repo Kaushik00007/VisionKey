@@ -1,0 +1,17 @@
+# Python environments
+venv/
+env/
+.env
+__pycache__/
+*.pyc
+
+# Project specific
+backend/venv/
+backend/temp_data/
+temp_data/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+.DS_Store

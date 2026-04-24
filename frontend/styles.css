@@ -1,0 +1,24 @@
+@layer components {
+    .glass-panel {
+        @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+    }
+}
+
+.animate-pulse-width {
+    animation: pulse-width 2s infinite ease-in-out;
+}
+
+@keyframes pulse-width {
+    0% { width: 0%; opacity: 1; }
+    50% { width: 100%; opacity: 0.5; }
+    100% { width: 0%; opacity: 1; }
+}
+
+.result-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.3);
+}
