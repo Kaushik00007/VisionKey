@@ -64,9 +64,71 @@ async def analyze_video(request: Request, body: AnalyzeRequest):
 async def health_check():
     return {"status": "ok"}
 
+@app.get("/video-info")
+@limiter.limit("5/minute")
+async def get_video_info(request: Request, url: str):
+    import yt_dlp
+    def fetch_info():
+        ydl_opts = {'quiet': True, 'no_warnings': True}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            formats = info.get('formats', [])
+            quality_options = []
+            for f in formats:
+                if f.get('vcodec') != 'none' and f.get('ext') == 'mp4':
+                    res = f.get('height', 0)
+                    if res:
+                        filesize = f.get('filesize') or f.get('filesize_approx')
+                        size_str = f"{round(filesize/1024/1024, 1)} MB" if filesize else "Unknown size"
+                        quality_options.append({
+                            "format_id": f.get('format_id'),
+                            "resolution": f"{res}p",
+                            "size": size_str,
+                            "height": res
+                        })
+            unique_opts = {}
+            for opt in quality_options:
+                if opt['resolution'] not in unique_opts or opt['height'] > unique_opts[opt['resolution']]['height']:
+                    unique_opts[opt['resolution']] = opt
+            sorted_opts = sorted(unique_opts.values(), key=lambda x: x['height'], reverse=True)
+            return {"title": info.get('title'), "formats": sorted_opts}
+    try:
+        data = await run_in_threadpool(fetch_info)
+        return {"status": "success", "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/download-video")
+async def download_video_endpoint(url: str, format_id: str):
+    import yt_dlp
+    import uuid
+    def download():
+        video_id = str(uuid.uuid4())
+        output_path = os.path.join(config.VIDEOS_DIR, f"dl_{video_id}.mp4")
+        ydl_opts = {
+            'format': f"{format_id}+bestaudio[ext=m4a]/best[ext=mp4]/best",
+            'outtmpl': output_path,
+            'quiet': True,
+            'merge_output_format': 'mp4'
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info)
+            if not filename.endswith('.mp4'):
+                filename = filename.rsplit('.', 1)[0] + '.mp4'
+            return filename, info.get('title', 'video')
+            
+    try:
+        filename, title = await run_in_threadpool(download)
+        safe_title = "".join(c for c in title if c.isalnum() or c in " -_").strip()
+        return FileResponse(filename, filename=f"{safe_title}.mp4", media_type='video/mp4')
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.get("/")
 async def serve_frontend():
     return FileResponse("../frontend/index.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    
