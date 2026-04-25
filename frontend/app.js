@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyState = document.getElementById('empty-state');
     const errorMessage = document.getElementById('error-message');
     const resultsCount = document.getElementById('results-count');
+    
+    const getLinksBtn = document.getElementById('get-links-btn');
+    const downloadSection = document.getElementById('download-section');
+    const downloadTitle = document.getElementById('download-title');
+    const downloadOptions = document.getElementById('download-options');
 
     analyzeBtn.addEventListener('click', async () => {
         const url = urlInput.value.trim();
@@ -27,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hideError();
         resultsSection.classList.add('hidden');
         emptyState.classList.add('hidden');
+        if (downloadSection) downloadSection.classList.add('hidden');
         loadingState.classList.remove('hidden');
         analyzeBtn.disabled = true;
         analyzeBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -122,6 +128,51 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    getLinksBtn.addEventListener('click', async () => {
+        const url = urlInput.value.trim();
+        if (!url) { showError("Please enter a valid YouTube URL"); return; }
+        
+        hideError();
+        resultsSection.classList.add('hidden');
+        emptyState.classList.add('hidden');
+        downloadSection.classList.add('hidden');
+        
+        const originalText = getLinksBtn.innerHTML;
+        getLinksBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div><span>...</span>';
+        getLinksBtn.disabled = true;
+
+        try {
+            const apiUrl = window.location.origin + `/video-info?url=${encodeURIComponent(url)}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.detail || 'Failed to fetch video info');
+            
+            downloadTitle.textContent = data.data.title;
+            downloadOptions.innerHTML = '';
+            
+            data.data.formats.forEach(f => {
+                const btn = document.createElement('button');
+                btn.className = 'flex flex-col items-center justify-center p-4 bg-white/5 hover:bg-indigo-500/20 border border-white/10 hover:border-indigo-500/50 rounded-xl transition-all group';
+                btn.innerHTML = `
+                    <span class="font-bold text-lg text-white group-hover:text-indigo-300">${f.resolution}</span>
+                    <span class="text-xs text-slate-400 mt-1">${f.size}</span>
+                `;
+                btn.onclick = () => {
+                    window.location.href = `/download-video?url=${encodeURIComponent(url)}&format_id=${f.format_id}`;
+                };
+                downloadOptions.appendChild(btn);
+            });
+            
+            downloadSection.classList.remove('hidden');
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            getLinksBtn.innerHTML = originalText;
+            getLinksBtn.disabled = false;
+        }
+    });
 
     function showError(msg) {
         errorMessage.textContent = msg;
