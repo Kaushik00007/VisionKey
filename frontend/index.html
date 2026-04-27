@@ -3,109 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VisionKey - Video OCR Password Extractor</title>
+    <title>VisionKey - Video OCR Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            purple: '#7c3aed',
+                            indigo: '#4f46e5',
+                            blue: '#3b82f6',
+                            base: '#05070d',
+                            surface: '#0b0f1a',
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link href="/static/styles.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-900 text-white min-h-screen font-inter antialiased selection:bg-indigo-500/30">
+<body class="bg-brand-base text-white min-h-screen font-inter antialiased selection:bg-brand-purple/30 relative overflow-x-hidden">
+    
+    <!-- Background Gradient Blobs -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-purple/20 blur-[120px] blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-brand-indigo/10 blur-[150px] blob blob-delay"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[700px] h-[700px] rounded-full bg-brand-blue/10 blur-[150px] blob"></div>
+    </div>
+
     <!-- Navbar -->
-    <nav class="border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-lg shadow-lg shadow-indigo-500/20">V</div>
-                <span class="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">VisionKey</span>
+    <nav class="relative z-50 border-b border-white/[0.05] bg-brand-surface/40 backdrop-blur-2xl">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3 group cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-indigo to-brand-purple flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(124,58,237,0.3)] group-hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] transition-shadow duration-300">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </div>
+                <span class="font-bold text-2xl tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-brand-purple/80 transition-all duration-300">VisionKey</span>
             </div>
-            <div class="text-sm font-medium text-slate-400">OCR Intelligence</div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="#" class="text-slate-300 hover:text-white transition-colors">Features</a>
+                <a href="#" class="text-slate-300 hover:text-white transition-colors">API</a>
+                <a href="#" class="text-slate-300 hover:text-white transition-colors">Documentation</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="hidden md:block text-sm font-semibold text-white px-5 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors">Log In</button>
+                <button class="text-sm font-semibold text-white px-5 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-md">Sign Up</button>
+            </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-6 py-12 md:py-20">
-        <div class="max-w-2xl mx-auto text-center space-y-6 mb-12">
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 pb-2">
-                Extract Hidden Passwords from Videos
+    <main class="relative z-10 max-w-7xl mx-auto px-6 py-20 md:py-32 flex flex-col items-center">
+        <!-- Hero Section -->
+        <div class="max-w-4xl mx-auto text-center space-y-8 mb-16 opacity-0 animate-fade-in-up">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-purple/30 bg-brand-purple/10 backdrop-blur-md shadow-[0_0_20px_rgba(124,58,237,0.15)] mb-4">
+                <span class="w-2 h-2 rounded-full bg-brand-purple animate-pulse"></span>
+                <span class="text-xs font-semibold tracking-wide text-brand-purple uppercase">AI Powered OCR</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight pb-2">
+                Extract Hidden Passwords <br class="hidden md:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-indigo via-brand-purple to-pink-400">from Videos instantly.</span>
             </h1>
-            <p class="text-lg text-slate-400">
-                Paste a YouTube URL below to analyze the video. Our advanced OCR engine will scan frames and detect passwords, codes, and hidden keys.
+            <p class="text-lg md:text-xl text-slate-400/80 max-w-2xl mx-auto leading-relaxed font-light">
+                Paste a YouTube URL below to analyze the video. Our advanced machine learning pipeline will scan frames, run OCR, and detect passwords, codes, and hidden keys seamlessly.
             </p>
         </div>
 
         <!-- Input Section -->
-        <div class="max-w-3xl mx-auto">
-            <div class="glass-panel p-2 rounded-2xl flex flex-col md:flex-row gap-2">
-                <input 
-                    type="url" 
-                    id="youtube-url"
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    class="flex-1 bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-lg"
-                    required
-                >
+        <div class="w-full max-w-3xl mx-auto opacity-0 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="glass-input-container flex flex-col md:flex-row gap-3">
+                <div class="relative flex-1 flex items-center">
+                    <div class="absolute left-5 text-slate-400">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                    </div>
+                    <input 
+                        type="url" 
+                        id="youtube-url"
+                        placeholder="Paste YouTube URL here..."
+                        class="w-full bg-transparent border-none px-14 py-5 text-white placeholder-slate-500 focus:outline-none focus:ring-0 text-lg font-medium"
+                        required
+                    >
+                </div>
                 <button 
                     id="analyze-btn"
-                    class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-semibold py-4 px-8 rounded-xl transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2"
+                    class="bg-gradient-to-r from-brand-purple to-brand-indigo hover:from-[#8a4bfa] hover:to-[#5c54f6] text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2 group"
                 >
                     <span>Analyze Video</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </button>
                 <button 
                     id="get-links-btn"
-                    class="bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                    class="bg-white/5 hover:bg-white/10 text-white font-semibold py-4 px-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
                 >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    <span>Download</span>
+                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
             </div>
             
-            <div id="error-message" class="hidden mt-4 text-red-400 text-center text-sm font-medium bg-red-500/10 py-3 rounded-lg border border-red-500/20"></div>
+            <div id="error-message" class="hidden mt-6 text-red-400 text-center text-sm font-medium bg-red-500/10 py-4 px-6 rounded-xl border border-red-500/20 backdrop-blur-md shadow-lg shadow-red-500/5 transition-all"></div>
         </div>
 
         <!-- Download Links Section -->
-        <div id="download-section" class="hidden max-w-3xl mx-auto mt-6 glass-panel p-6 rounded-2xl border border-white/10">
-            <h3 class="text-xl font-bold text-white mb-4" id="download-title">Video Title</h3>
+        <div id="download-section" class="hidden w-full max-w-4xl mx-auto mt-12 glass-panel p-8 rounded-3xl border border-white/10 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-brand-blue/10 rounded-full blur-[80px] -z-10"></div>
+            <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3" id="download-title">
+                <svg class="w-6 h-6 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Video Title
+            </h3>
             <div id="download-options" class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <!-- Download buttons injected here -->
             </div>
         </div>
 
         <!-- Loading State -->
-        <div id="loading-state" class="hidden max-w-xl mx-auto mt-20 text-center space-y-6">
-            <div class="relative w-24 h-24 mx-auto">
-                <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
-                <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+        <div id="loading-state" class="hidden w-full max-w-2xl mx-auto mt-24 text-center space-y-8">
+            <div class="relative w-32 h-32 mx-auto rounded-3xl glass-panel border border-white/10 overflow-hidden flex items-center justify-center">
+                <div class="scanner-line"></div>
+                <svg class="w-12 h-12 text-brand-purple/50 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             </div>
             <div>
-                <h3 class="text-xl font-semibold text-white">Analyzing Video</h3>
-                <p class="text-slate-400 mt-2 text-sm">Downloading video, extracting frames, and running OCR.<br>This may take a few minutes depending on video length.</p>
+                <h3 class="text-2xl font-semibold text-white tracking-tight">Scanning Video Feed</h3>
+                <p class="text-slate-400 mt-3 text-sm max-w-md mx-auto leading-relaxed">Downloading frames, analyzing visual data, and running neural OCR models. This may take a few moments.</p>
             </div>
             
-            <div class="w-full bg-white/5 rounded-full h-1.5 mt-6 overflow-hidden">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-1.5 rounded-full animate-pulse-width"></div>
+            <div class="w-full bg-white/5 rounded-full h-2 mt-8 overflow-hidden shadow-inner border border-white/5">
+                <div class="bg-gradient-to-r from-brand-indigo via-brand-purple to-pink-500 h-full rounded-full animate-pulse-width shadow-[0_0_15px_rgba(124,58,237,0.5)]"></div>
             </div>
         </div>
 
         <!-- Results Section -->
-        <div id="results-section" class="hidden mt-20">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-bold text-white flex items-center gap-3">
-                    <span class="w-2 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></span>
-                    Detected Passwords
+        <div id="results-section" class="hidden w-full max-w-6xl mt-24">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4 border-b border-white/10 pb-6">
+                <h2 class="text-3xl font-bold text-white flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-brand-purple/10 flex items-center justify-center border border-brand-purple/20">
+                        <svg class="w-6 h-6 text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    Intelligence Report
                 </h2>
-                <span id="results-count" class="bg-indigo-500/20 text-indigo-300 py-1 px-3 rounded-full text-sm font-semibold border border-indigo-500/30">0 found</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-slate-400">Total Discoveries:</span>
+                    <span id="results-count" class="bg-brand-purple/20 text-brand-purple py-1.5 px-4 rounded-full text-sm font-bold border border-brand-purple/30 shadow-[0_0_15px_rgba(124,58,237,0.2)]">0 found</span>
+                </div>
             </div>
             
-            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Cards will be injected here -->
             </div>
         </div>
         
         <!-- Empty State -->
-        <div id="empty-state" class="hidden mt-20 text-center p-12 glass-panel rounded-2xl border-dashed border-2 border-white/10">
-            <svg class="w-16 h-16 mx-auto text-slate-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <h3 class="text-xl font-medium text-white mb-2">No passwords detected</h3>
-            <p class="text-slate-400">We couldn't find any clear passwords in this video.</p>
+        <div id="empty-state" class="hidden w-full max-w-2xl mx-auto mt-20 text-center p-16 glass-panel rounded-3xl border-dashed border-2 border-white/10 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 -z-10"></div>
+            <div class="w-20 h-20 mx-auto bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-6 shadow-lg">
+                <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-3">No Passwords Detected</h3>
+            <p class="text-slate-400 text-lg max-w-md mx-auto">Our models scanned the video but couldn't find any clear text matching password patterns.</p>
+        </div>
+
+        <!-- Preview Section (Mock / Decorative for Premium Feel) -->
+        <div class="w-full max-w-5xl mx-auto mt-32 pt-20 border-t border-white/10 opacity-0 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="text-center mb-12">
+                <h2 class="text-2xl font-bold text-white mb-4">See It In Action</h2>
+                <p class="text-slate-400">Advanced frame analysis pipeline extracts clear text from compressed video artifacts.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                <!-- Decorative background elements behind mockups -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-brand-purple/5 blur-[100px] rounded-full -z-10"></div>
+                
+                <div class="glass-panel p-4 rounded-3xl rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
+                    <div class="bg-black/50 rounded-2xl h-48 overflow-hidden relative border border-white/5">
+                        <!-- Mock Video Frame -->
+                        <div class="absolute inset-0 opacity-40 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDIwaDQwTTIwIDB2NDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')]"></div>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-brand-purple p-2 rounded bg-black/60 backdrop-blur-sm">
+                            <span class="text-brand-purple font-mono text-sm shadow-[0_0_10px_#7c3aed]">WIFI_PWD: Secr3tKey</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-panel p-4 rounded-3xl rotate-[2deg] hover:rotate-0 transition-transform duration-500 md:mt-12">
+                    <div class="bg-black/50 rounded-2xl h-48 overflow-hidden relative border border-white/5 flex items-center justify-center flex-col gap-4">
+                        <div class="w-full px-6 flex justify-between items-center text-xs font-mono text-slate-500 uppercase">
+                            <span>Confidence: 98.4%</span>
+                            <span>Frame: 1420</span>
+                        </div>
+                        <div class="w-full px-6">
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="w-full h-full bg-brand-indigo rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-mono text-white tracking-widest mt-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">Secr3tKey</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 bg-black/20 backdrop-blur-lg mt-20">
+        <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-slate-500 text-sm">© 2026 VisionKey Intelligence. All rights reserved.</div>
+            <div class="flex gap-6 text-sm font-medium">
+                <a href="#" class="text-slate-400 hover:text-white transition-colors">Privacy</a>
+                <a href="#" class="text-slate-400 hover:text-white transition-colors">Terms</a>
+                <a href="#" class="text-slate-400 hover:text-white transition-colors">Contact</a>
+            </div>
+        </div>
+    </footer>
 
     <script src="/static/app.js"></script>
 </body>
