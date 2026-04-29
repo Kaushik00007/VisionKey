@@ -7,7 +7,7 @@ def extract_passwords(ocr_results: list) -> list:
     
     # Capture everything after the keyword on the same line
     keyword_pattern = re.compile(
-        r'\b(?:p[a@][s5]{2}w[o0]rd|pass|pwd|code)\b\s*[\:\-\=\>\|]*\s*(.+)',
+        r'(p[a@][s5]{2}w[o0]rd|pass|pwd|code)[\:\-\=\>\|]*(.+)',
         re.IGNORECASE
     )
     fallback_pattern = re.compile(r'\b([A-Z0-9]{6,})\b')
@@ -26,10 +26,12 @@ def extract_passwords(ocr_results: list) -> list:
             if not line:
                 continue
 
-            kw_match = keyword_pattern.search(line)
+            # Strip spaces entirely for robust keyword detection (handles 'P A S S W O R D')
+            line_no_spaces = line.replace(' ', '')
+            
+            kw_match = keyword_pattern.search(line_no_spaces)
             if kw_match:
-                # Remove spaces so spaced passwords like '* 2 * *' become '*2**'
-                pwd = kw_match.group(1).replace(' ', '').strip()
+                pwd = kw_match.group(2).strip()
                 pwd = re.sub(r'[\.\,\;\:]+$', '', pwd)
                 
                 if len(pwd) >= 2 and any(c.isalnum() for c in pwd):
