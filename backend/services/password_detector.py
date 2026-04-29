@@ -26,15 +26,15 @@ def extract_passwords(ocr_results: list) -> list:
             if not line:
                 continue
 
-            # Strip spaces entirely for robust keyword detection (handles 'P A S S W O R D')
-            line_no_spaces = line.replace(' ', '')
-            
-            kw_match = keyword_pattern.search(line_no_spaces)
+            # Use the original line for regex matching so we don't accidentally merge noise
+            kw_match = keyword_pattern.search(line)
             if kw_match:
-                pwd = kw_match.group(2).strip()
+                # Remove spaces so spaced passwords like '* 2 * *' become '*2**'
+                pwd = kw_match.group(2).replace(' ', '').strip()
                 pwd = re.sub(r'[\.\,\;\:]+$', '', pwd)
                 
-                if len(pwd) >= 2 and any(c.isalnum() for c in pwd):
+                # Keep passwords between 2 and 12 characters to avoid UI noise
+                if len(pwd) >= 2 and len(pwd) <= 12 and any(c.isalnum() for c in pwd):
                     raw_detections.append({
                         "password": pwd,
                         "timestamp": formatted_time,
