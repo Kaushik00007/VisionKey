@@ -8,21 +8,18 @@ from utils.logger import logger
 
 def clean_ocr_text(text: str) -> str:
     text = " ".join(text.split())
-    text = re.sub(r'[^\w\s\-\=\:\.\,\!\|\@\#\$\%\^\&\*]', '', text)
+    text = re.sub(r'[^\w\s\-\=\:\.\,\!\|\@\#\$\%\^\&\*\?]', '', text)
     text = re.sub(r'([A-Za-z])0([A-Za-z])', r'\1O\2', text)
     text = re.sub(r'([A-Za-z])5([A-Za-z])', r'\1S\2', text)
     return text.strip()
 
 def preprocess_image(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.convertScaleAbs(gray, alpha=1.5, beta=20)
-    gray = cv2.medianBlur(gray, 3)
-    thresh = cv2.adaptiveThreshold(
-        gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
-    )
-    kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-    sharpened = cv2.filter2D(thresh, -1, kernel)
-    return sharpened
+    # Increase contrast
+    gray = cv2.convertScaleAbs(gray, alpha=1.5, beta=0)
+    # Invert the image so bright text on dark background becomes dark text on bright background
+    inverted = cv2.bitwise_not(gray)
+    return inverted
 
 def run_multi_pass_ocr(img) -> list:
     results = set()
