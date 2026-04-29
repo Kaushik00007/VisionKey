@@ -11,7 +11,7 @@ def download_video(url: str, video_id: str) -> str:
     output_path = os.path.join(config.VIDEOS_DIR, f"{video_id}.mp4")
     
     ydl_opts = {
-        'format': 'bestvideo[ext=mp4][height<=720]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'format': 'bestvideo[ext=mp4][vcodec^=avc][height<=720]+bestaudio[ext=m4a]/best[ext=mp4][vcodec^=avc]/best',
         'outtmpl': output_path,
         'noplaylist': True,
         'quiet': True,
