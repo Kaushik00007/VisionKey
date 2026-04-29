@@ -10,8 +10,8 @@ class Config(BaseModel):
     VIDEOS_DIR: str = os.path.join(os.getcwd(), "temp_data", "videos")
     FRAMES_DIR: str = os.path.join(os.getcwd(), "temp_data", "frames")
     
-    # OCR configs (Optimized for speed: removed redundant passes, psm 11 is best for scattered text)
-    OCR_PSM_CONFIGS: list = ['--psm 11']
+    # OCR configs (Optimized for speed and accuracy: psm 6 reads uniform text blocks without hallucinating textures)
+    OCR_PSM_CONFIGS: list = ['--psm 6']
     
     def setup_dirs(self):
         """Ensure necessary temp directories exist."""
