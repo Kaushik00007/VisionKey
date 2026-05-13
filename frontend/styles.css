@@ -4,26 +4,36 @@
 
 @layer base {
   body {
-    @apply bg-[#05070d] text-white selection:bg-brand-purple/30 overflow-x-hidden;
+    @apply bg-[#070B14] text-white selection:bg-[#3E4557] overflow-x-hidden;
+    /* Noise texture and grid background */
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      radial-gradient(circle at top right, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.03) 0%, transparent 40%);
+    background-size: 32px 32px, 32px 32px, 100% 100%, 100% 100%;
+    background-attachment: fixed;
   }
 }
 
 @layer components {
+  /* Extremely minimal, modern glass panels without excessive blur/glow */
   .glass-panel {
-    @apply bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+    @apply bg-[#0B1020]/80 backdrop-blur-md border border-white/[0.06] shadow-sm;
   }
   
   .glass-input-container {
-    @apply bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-[0_0_40px_-10px_rgba(124,58,237,0.15)];
+    @apply bg-[#070B14] border border-white/[0.08] shadow-[0_2px_10px_0_rgba(0,0,0,0.4)] transition-all;
   }
 
-  .premium-gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-brand-purple;
+  /* Subtle gradient emphasis on specific words */
+  .subtle-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-gray-200 via-indigo-200 to-gray-400;
   }
 }
 
 .animate-pulse-width {
-    animation: pulse-width 2s infinite ease-in-out;
+    animation: pulse-width 2.5s infinite ease-in-out;
 }
 
 @keyframes pulse-width {
@@ -33,25 +43,27 @@
 }
 
 .result-card {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .result-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px -15px rgba(124, 58, 237, 0.25), 0 0 20px 0 rgba(124, 58, 237, 0.1) inset;
+    transform: translateY(-2px);
+    border-color: rgba(79, 70, 229, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Custom Scanning Animation */
+/* Elegant, subtle dashboard scanning line */
 .scanner-line {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, #7c3aed, transparent);
-  box-shadow: 0 0 10px #7c3aed, 0 0 20px #4f46e5;
-  animation: scan 2s linear infinite;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(79, 70, 229, 0.6), transparent);
+  box-shadow: 0 1px 5px rgba(79, 70, 229, 0.3);
+  animation: scan 2.5s linear infinite;
   opacity: 0.8;
+  z-index: 10;
 }
 
 @keyframes scan {
@@ -61,18 +73,28 @@
   100% { top: 100%; opacity: 0; }
 }
 
-/* Background blob animations */
-.blob {
-  animation: float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+/* Dashboard Mock Animations */
+.log-line {
+  opacity: 0;
+  animation: typeLog 0.1s forwards;
 }
 
-.blob-delay {
-  animation: float 25s infinite alternate-reverse cubic-bezier(0.4, 0, 0.2, 1);
+@keyframes typeLog {
+  to { opacity: 1; }
 }
 
-@keyframes float {
-  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  33% { transform: translate(50px, -50px) scale(1.1) rotate(10deg); }
-  66% { transform: translate(-30px, 30px) scale(0.9) rotate(-5deg); }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+/* Clean, thin custom scrollbar for terminal panels */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
 }
