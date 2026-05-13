@@ -75,7 +75,7 @@ async def get_video_info(request: Request, url: str):
             formats = info.get('formats', [])
             quality_options = []
             for f in formats:
-                if f.get('vcodec') != 'none' and f.get('ext') == 'mp4':
+                if f.get('vcodec', '').startswith('avc') and f.get('ext') == 'mp4':
                     res = f.get('height', 0)
                     if res:
                         filesize = f.get('filesize') or f.get('filesize_approx')
@@ -131,4 +131,3 @@ async def serve_frontend():
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-    
