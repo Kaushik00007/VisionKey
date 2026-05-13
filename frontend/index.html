@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VisionKey - Video OCR Intelligence</title>
+    <title>VisionKey - AI Credential Extraction Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,23 +11,28 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                        inter: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
                     },
                     colors: {
                         brand: {
-                            purple: '#7c3aed',
+                            purple: '#6d28d9',
                             indigo: '#4f46e5',
-                            blue: '#3b82f6',
-                            base: '#05070d',
-                            surface: '#0b0f1a',
+                            base: '#070B14',
+                            surface: '#0B1020',
+                            border: 'rgba(255,255,255,0.08)'
                         }
                     },
                     animation: {
-                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     },
                     keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
@@ -36,209 +41,281 @@
         }
     </script>
     <link href="/static/styles.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-brand-base text-white min-h-screen font-inter antialiased selection:bg-brand-purple/30 relative overflow-x-hidden">
+<body class="bg-brand-base text-gray-200 min-h-screen font-sans antialiased relative">
     
-    <!-- Background Gradient Blobs -->
-    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-purple/20 blur-[120px] blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-brand-indigo/10 blur-[150px] blob blob-delay"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-[700px] h-[700px] rounded-full bg-brand-blue/10 blur-[150px] blob"></div>
-    </div>
-
     <!-- Navbar -->
-    <nav class="relative z-50 border-b border-white/[0.05] bg-brand-surface/40 backdrop-blur-2xl">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3 group cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-indigo to-brand-purple flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(124,58,237,0.3)] group-hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] transition-shadow duration-300">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+    <nav class="sticky top-0 z-50 border-b border-white/[0.04] bg-brand-base/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded border border-white/10 bg-brand-surface flex items-center justify-center font-semibold text-sm shadow-sm text-gray-200">
+                    <svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </div>
-                <span class="font-bold text-2xl tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-brand-purple/80 transition-all duration-300">VisionKey</span>
+                <span class="font-medium text-lg tracking-tight text-white">VisionKey</span>
             </div>
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-                <a href="#" class="text-slate-300 hover:text-white transition-colors">Features</a>
-                <a href="#" class="text-slate-300 hover:text-white transition-colors">API</a>
-                <a href="#" class="text-slate-300 hover:text-white transition-colors">Documentation</a>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
+                <a href="#" class="hover:text-white transition-colors">Features</a>
+                <a href="#" class="hover:text-white transition-colors">Docs</a>
+                <a href="#" class="hover:text-white transition-colors">API</a>
+                <a href="#" class="hover:text-white transition-colors">Pricing</a>
+                <a href="#" class="hover:text-white transition-colors">GitHub</a>
             </div>
-
+            <div class="flex items-center gap-4">
+                <button class="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition-colors">Sign In</button>
+                <button class="text-sm font-medium text-white px-4 py-2 rounded-md bg-white/10 hover:bg-white/15 border border-white/5 transition-colors shadow-sm">Get Started</button>
+            </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="relative z-10 max-w-7xl mx-auto px-6 py-20 md:py-32 flex flex-col items-center">
-        <!-- Hero Section -->
-        <div class="max-w-4xl mx-auto text-center space-y-8 mb-16 opacity-0 animate-fade-in-up">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-purple/30 bg-brand-purple/10 backdrop-blur-md shadow-[0_0_20px_rgba(124,58,237,0.15)] mb-4">
-                <span class="w-2 h-2 rounded-full bg-brand-purple animate-pulse"></span>
-                <span class="text-xs font-semibold tracking-wide text-brand-purple uppercase">AI Powered OCR</span>
-            </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight pb-2">
-                Extract Hidden Passwords <br class="hidden md:block" />
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-indigo via-brand-purple to-pink-400">from Videos instantly.</span>
-            </h1>
-            <p class="text-lg md:text-xl text-slate-400/80 max-w-2xl mx-auto leading-relaxed font-light">
-                Paste a YouTube URL below to analyze the video. Our advanced machine learning pipeline will scan frames, run OCR, and detect passwords, codes, and hidden keys seamlessly.
-            </p>
-        </div>
+    <main class="relative z-10 w-full max-w-7xl mx-auto px-6 py-16 md:py-24">
+        
+        <!-- Hero Section Layout: 2 Columns -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center mb-32 opacity-0 animate-slide-up">
+            
+            <!-- Left Side: Content -->
+            <div class="space-y-8 max-w-xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-brand-surface shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand-indigo animate-pulse"></span>
+                    <span class="text-xs font-medium text-gray-300">AI Video OCR Pipeline</span>
+                </div>
+                
+                <h1 class="text-4xl md:text-5xl font-semibold tracking-tight text-white leading-[1.1]">
+                    Extract Hidden <span class="subtle-gradient-text">Credentials</span> from Video Frames.
+                </h1>
+                
+                <p class="text-gray-400 text-base leading-relaxed">
+                    Analyze video frames using distributed OCR and regex pattern detection to seamlessly identify embedded API keys, authentication tokens, and sensitive strings.
+                </p>
 
-        <!-- Input Section -->
-        <div class="w-full max-w-3xl mx-auto opacity-0 animate-fade-in-up" style="animation-delay: 0.2s;">
-            <div class="glass-input-container flex flex-col md:flex-row gap-3">
-                <div class="relative flex-1 flex items-center">
-                    <div class="absolute left-5 text-slate-400">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                <!-- Input Component -->
+                <div class="space-y-4">
+                    <div class="glass-input-container rounded-xl flex items-center p-1.5 focus-within:border-brand-indigo/40 focus-within:ring-1 focus-within:ring-brand-indigo/40 transition-all">
+                        <div class="pl-4 pr-2 text-gray-500">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        </div>
+                        <input 
+                            type="url" 
+                            id="youtube-url"
+                            placeholder="Paste YouTube or video URL..."
+                            class="flex-1 bg-transparent border-none py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-0"
+                            required
+                        >
+                        <button 
+                            id="analyze-btn"
+                            class="bg-white text-black hover:bg-gray-200 font-medium text-sm py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span>Analyze</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
                     </div>
-                    <input 
-                        type="url" 
-                        id="youtube-url"
-                        placeholder="Paste YouTube URL here..."
-                        class="w-full bg-transparent border-none px-14 py-5 text-white placeholder-slate-500 focus:outline-none focus:ring-0 text-lg font-medium"
-                        required
-                    >
-                </div>
-                <button 
-                    id="analyze-btn"
-                    class="bg-gradient-to-r from-brand-purple to-brand-indigo hover:from-[#8a4bfa] hover:to-[#5c54f6] text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2 group"
-                >
-                    <span>Analyze Video</span>
-                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </button>
-                <button 
-                    id="get-links-btn"
-                    class="bg-white/5 hover:bg-white/10 text-white font-semibold py-4 px-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
-                >
-                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                </button>
-            </div>
-            
-            <div id="error-message" class="hidden mt-6 text-red-400 text-center text-sm font-medium bg-red-500/10 py-4 px-6 rounded-xl border border-red-500/20 backdrop-blur-md shadow-lg shadow-red-500/5 transition-all"></div>
-        </div>
-
-        <!-- Download Section (Redesigned as a card) -->
-        <div id="download-section" class="hidden w-full max-w-2xl mx-auto mt-12 bg-zinc-900 rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
-            <div class="p-6 border-b border-white/5">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-bold text-white">More formats</h3>
-                    <button id="close-download" class="p-2 hover:bg-white/5 rounded-full transition-colors">
-                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="max-h-[60vh] overflow-y-auto">
-                <div class="p-4 space-y-4">
-                    <div class="px-2 text-xs font-bold text-slate-500 uppercase tracking-widest">Video</div>
-                    <div id="download-options" class="space-y-2">
-                        <!-- Options will be injected here -->
+                    
+                    <div id="error-message" class="hidden text-red-400 text-sm font-medium bg-red-900/20 border border-red-500/20 px-4 py-3 rounded-lg flex items-center gap-2"></div>
+                    
+                    <div class="flex items-center gap-4 pt-2">
+                        <button 
+                            id="get-links-btn"
+                            class="text-sm font-medium text-gray-400 hover:text-white border border-white/10 hover:border-white/20 bg-brand-surface py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Download Media</span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 text-xs text-gray-500 font-medium pt-2">
+                        <span>Frame OCR</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-700"></span>
+                        <span>Token Detection</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-700"></span>
+                        <span>Pattern Matching</span>
                     </div>
                 </div>
             </div>
 
-            <div class="p-6 bg-zinc-900 border-t border-white/5">
-                <button id="confirm-download-btn" class="w-full bg-[#fcd34d] hover:bg-[#fbbf24] text-black font-extrabold py-5 rounded-2xl transition-all shadow-[0_0_30px_rgba(252,211,77,0.2)] flex items-center justify-center gap-2">
-                    <span>Download Selected</span>
-                </button>
+            <!-- Right Side: Dashboard Preview Visual -->
+            <div class="relative w-full aspect-square md:aspect-video lg:aspect-square max-w-lg mx-auto">
+                <div class="absolute inset-0 bg-brand-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+                    <!-- Dashboard Header -->
+                    <div class="h-10 border-b border-white/10 bg-[#0B1020]/50 flex items-center px-4 gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-white/10"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-white/10"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-white/10"></div>
+                        <div class="mx-auto text-xs font-mono text-gray-500">visionkey_analyzer.py</div>
+                    </div>
+                    <!-- Dashboard Content -->
+                    <div class="flex-1 flex flex-col p-4 gap-4 relative">
+                        <div class="scanner-line"></div>
+                        
+                        <!-- Top Half: Video & Confidence -->
+                        <div class="grid grid-cols-2 gap-4 h-32">
+                            <div class="rounded-lg border border-white/10 bg-black/50 overflow-hidden relative group">
+                                <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDIwaDQwTTIwIDB2NDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')]"></div>
+                                <div class="absolute inset-2 border border-brand-indigo/50 bg-brand-indigo/10 flex items-center justify-center">
+                                    <div class="w-8 h-8 border-2 border-brand-indigo/50 border-t-brand-indigo rounded-full animate-spin"></div>
+                                </div>
+                                <div class="absolute bottom-2 left-2 text-[10px] font-mono text-white/50">FR: 0142</div>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <div class="rounded-lg border border-white/10 bg-brand-surface p-3 flex-1 flex flex-col justify-center">
+                                    <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1">Detection Confidence</div>
+                                    <div class="flex items-end gap-2">
+                                        <div class="text-2xl font-mono text-white leading-none">98.4</div>
+                                        <div class="text-xs text-brand-indigo pb-0.5">%</div>
+                                    </div>
+                                </div>
+                                <div class="rounded-lg border border-white/10 bg-brand-surface p-3 flex-1 flex flex-col justify-center">
+                                    <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1">Active Model</div>
+                                    <div class="text-sm font-mono text-gray-300">Tesseract_v5</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Half: Terminal Logs -->
+                        <div class="flex-1 rounded-lg border border-white/10 bg-black/60 p-3 font-mono text-[10px] sm:text-xs overflow-hidden flex flex-col justify-end text-gray-400">
+                            <div class="space-y-1">
+                                <div class="log-line" style="animation-delay: 0.1s">> initializing video stream... OK</div>
+                                <div class="log-line" style="animation-delay: 0.3s">> extracting frames (1fps)... OK</div>
+                                <div class="log-line" style="animation-delay: 0.6s">> running ocr pre-processing...</div>
+                                <div class="log-line text-brand-indigo" style="animation-delay: 1.0s">> pattern match found [AWS_KEY] at 00:14:02</div>
+                                <div class="log-line text-white/90" style="animation-delay: 1.2s">  AKIAIOSFODNN7EXAMPLE</div>
+                                <div class="log-line text-brand-indigo" style="animation-delay: 1.8s">> pattern match found [JWT] at 00:15:30</div>
+                                <div class="log-line text-white/90" style="animation-delay: 2.0s">  eyJhbGciOiJIUzI1NiIsInR5c...</div>
+                                <div class="log-line" style="animation-delay: 2.2s">_</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Soft glow behind the card -->
+                <div class="absolute inset-0 bg-brand-indigo/10 blur-[80px] -z-10"></div>
             </div>
         </div>
 
-        <!-- Active Downloads Section -->
-        <div id="active-downloads" class="hidden w-full max-w-2xl mx-auto mt-8 space-y-4">
-            <h3 class="text-lg font-bold text-white px-2">Downloading</h3>
-            <div id="downloads-list" class="space-y-3">
-                <!-- Progress items will be injected here -->
-            </div>
-        </div>
-
+        <!-- Dynamic States (Hidden by default) -->
+        
         <!-- Loading State -->
-        <div id="loading-state" class="hidden w-full max-w-2xl mx-auto mt-24 text-center space-y-8">
-            <div class="relative w-32 h-32 mx-auto rounded-3xl glass-panel border border-white/10 overflow-hidden flex items-center justify-center">
-                <div class="scanner-line"></div>
-                <svg class="w-12 h-12 text-brand-purple/50 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <div id="loading-state" class="hidden w-full max-w-xl mx-auto my-32 text-center space-y-6">
+            <div class="flex items-center justify-center mb-6">
+                <div class="w-12 h-12 border-2 border-white/10 border-t-white rounded-full animate-spin"></div>
             </div>
             <div>
-                <h3 class="text-2xl font-semibold text-white tracking-tight">Scanning Video Feed</h3>
-                <p class="text-slate-400 mt-3 text-sm max-w-md mx-auto leading-relaxed">Downloading frames, analyzing visual data, and running neural OCR models. This may take a few moments.</p>
+                <h3 class="text-lg font-medium text-white">Analyzing Feed...</h3>
+                <p class="text-gray-500 text-sm mt-1">Downloading, extracting frames, and processing neural OCR models.</p>
+            </div>
+            <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-4">
+                <div class="h-full bg-white/80 animate-pulse-width"></div>
+            </div>
+        </div>
+
+        <!-- Download Section -->
+        <div id="download-section" class="hidden w-full max-w-4xl mx-auto my-16 p-8 border border-white/10 rounded-2xl bg-brand-surface shadow-sm">
+            <h3 class="text-lg font-medium text-white mb-6 flex items-center gap-2" id="download-title">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
+                Video Title
+            </h3>
+            <div id="download-options" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <!-- Download buttons injected here -->
             </div>
         </div>
 
         <!-- Results Section -->
-        <div id="results-section" class="hidden w-full max-w-6xl mt-24">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4 border-b border-white/10 pb-6">
-                <h2 class="text-3xl font-bold text-white flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-brand-purple/10 flex items-center justify-center border border-brand-purple/20">
-                        <svg class="w-6 h-6 text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    </div>
+        <div id="results-section" class="hidden w-full mt-16 mb-32 border-t border-white/5 pt-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-xl font-medium text-white flex items-center gap-2">
                     Intelligence Report
                 </h2>
                 <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-slate-400">Total Discoveries:</span>
-                    <span id="results-count" class="bg-brand-purple/20 text-brand-purple py-1.5 px-4 rounded-full text-sm font-bold border border-brand-purple/30 shadow-[0_0_15px_rgba(124,58,237,0.2)]">0 found</span>
+                    <span class="text-xs font-medium text-gray-500">Discoveries</span>
+                    <span id="results-count" class="bg-white/10 text-white py-1 px-3 rounded-full text-xs font-semibold border border-white/10">0</span>
                 </div>
             </div>
             
-            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Cards will be injected here -->
             </div>
         </div>
         
         <!-- Empty State -->
-        <div id="empty-state" class="hidden w-full max-w-2xl mx-auto mt-20 text-center p-16 glass-panel rounded-3xl border-dashed border-2 border-white/10 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 -z-10"></div>
-            <div class="w-20 h-20 mx-auto bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-6 shadow-lg">
-                <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
-            </div>
-            <h3 class="text-2xl font-semibold text-white mb-3">No Passwords Detected</h3>
-            <p class="text-slate-400 text-lg max-w-md mx-auto">Our models scanned the video but couldn't find any clear text matching password patterns.</p>
+        <div id="empty-state" class="hidden w-full max-w-xl mx-auto my-32 text-center p-12 border border-white/10 rounded-2xl bg-brand-surface shadow-sm">
+            <svg class="w-8 h-8 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <h3 class="text-base font-medium text-white mb-1">No Sensitive Data Detected</h3>
+            <p class="text-gray-500 text-sm">The analyzer scanned the video but couldn't find any clear text matching credential patterns.</p>
         </div>
 
-        <!-- Preview Section (Mock / Decorative for Premium Feel) -->
-        <div class="w-full max-w-5xl mx-auto mt-32 pt-20 border-t border-white/10 opacity-0 animate-fade-in-up" style="animation-delay: 0.4s;">
-            <div class="text-center mb-12">
-                <h2 class="text-2xl font-bold text-white mb-4">See It In Action</h2>
-                <p class="text-slate-400">Advanced frame analysis pipeline extracts clear text from compressed video artifacts.</p>
+        <!-- Features Section -->
+        <div class="border-t border-white/5 pt-24 mt-12 pb-12 opacity-0 animate-slide-up" style="animation-delay: 0.2s;">
+            <div class="text-center mb-16">
+                <h2 class="text-2xl font-medium text-white mb-3">Enterprise-Grade Extraction</h2>
+                <p class="text-gray-400 text-sm">A comprehensive suite designed for security analysts and penetration testers.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-                <!-- Decorative background elements behind mockups -->
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-brand-purple/5 blur-[100px] rounded-full -z-10"></div>
-                
-                <div class="glass-panel p-4 rounded-3xl rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
-                    <div class="bg-black/50 rounded-2xl h-48 overflow-hidden relative border border-white/5">
-                        <!-- Mock Video Frame -->
-                        <div class="absolute inset-0 opacity-40 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDIwaDQwTTIwIDB2NDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')]"></div>
-                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-brand-purple p-2 rounded bg-black/60 backdrop-blur-sm">
-                            <span class="text-brand-purple font-mono text-sm shadow-[0_0_10px_#7c3aed]">WIFI_PWD: Secr3tKey</span>
-                        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="p-6 border border-white/5 rounded-xl bg-brand-surface hover:bg-white/[0.03] transition-colors group">
+                    <div class="w-10 h-10 rounded border border-white/10 bg-black flex items-center justify-center mb-4 text-gray-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
+                    <h3 class="text-base font-medium text-white mb-2">Frame-by-frame OCR</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Extracts text from every significant keyframe, mitigating motion blur and compression artifacts.</p>
                 </div>
-                
-                <div class="glass-panel p-4 rounded-3xl rotate-[2deg] hover:rotate-0 transition-transform duration-500 md:mt-12">
-                    <div class="bg-black/50 rounded-2xl h-48 overflow-hidden relative border border-white/5 flex items-center justify-center flex-col gap-4">
-                        <div class="w-full px-6 flex justify-between items-center text-xs font-mono text-slate-500 uppercase">
-                            <span>Confidence: 98.4%</span>
-                            <span>Frame: 1420</span>
-                        </div>
-                        <div class="w-full px-6">
-                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
-                                <div class="w-full h-full bg-brand-indigo rounded-full"></div>
-                            </div>
-                        </div>
-                        <div class="text-3xl font-mono text-white tracking-widest mt-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">Secr3tKey</div>
+                <!-- Feature 2 -->
+                <div class="p-6 border border-white/5 rounded-xl bg-brand-surface hover:bg-white/[0.03] transition-colors group">
+                    <div class="w-10 h-10 rounded border border-white/10 bg-black flex items-center justify-center mb-4 text-gray-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
+                    <h3 class="text-base font-medium text-white mb-2">Credential Detection</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Leverages machine learning to isolate passwords, tokens, and keys from surrounding noise.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="p-6 border border-white/5 rounded-xl bg-brand-surface hover:bg-white/[0.03] transition-colors group">
+                    <div class="w-10 h-10 rounded border border-white/10 bg-black flex items-center justify-center mb-4 text-gray-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    </div>
+                    <h3 class="text-base font-medium text-white mb-2">Pattern Matching</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Built-in regex rules for common API keys (AWS, Stripe, GitHub, Slack) and generic JSON Web Tokens.</p>
+                </div>
+                <!-- Feature 4 -->
+                <div class="p-6 border border-white/5 rounded-xl bg-brand-surface hover:bg-white/[0.03] transition-colors group">
+                    <div class="w-10 h-10 rounded border border-white/10 bg-black flex items-center justify-center mb-4 text-gray-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </div>
+                    <h3 class="text-base font-medium text-white mb-2">Export Results</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Download intelligence reports in CSV/JSON formats, completely mapping occurrences with timestamps.</p>
+                </div>
+                <!-- Feature 5 -->
+                <div class="p-6 border border-white/5 rounded-xl bg-brand-surface hover:bg-white/[0.03] transition-colors group">
+                    <div class="w-10 h-10 rounded border border-white/10 bg-black flex items-center justify-center mb-4 text-gray-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-base font-medium text-white mb-2">Real-time Processing</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Stream processing architecture handles live video feeds and large files efficiently with minimal latency.</p>
+                </div>
+                <!-- Feature 6 -->
+                <div class="p-6 border border-white/5 rounded-xl bg-brand-surface hover:bg-white/[0.03] transition-colors group">
+                    <div class="w-10 h-10 rounded border border-white/10 bg-black flex items-center justify-center mb-4 text-gray-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <h3 class="text-base font-medium text-white mb-2">Security Analysis</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Run automated audits against corporate training videos or screen recordings before public release.</p>
                 </div>
             </div>
         </div>
+
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-white/5 bg-black/20 backdrop-blur-lg mt-20">
-        <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="text-slate-500 text-sm">© 2026 VisionKey Intelligence. All rights reserved.</div>
-            <div class="flex gap-6 text-sm font-medium">
-                <a href="#" class="text-slate-400 hover:text-white transition-colors">Privacy</a>
-                <a href="#" class="text-slate-400 hover:text-white transition-colors">Terms</a>
-                <a href="#" class="text-slate-400 hover:text-white transition-colors">Contact</a>
+    <footer class="border-t border-white/[0.04] bg-brand-base">
+        <div class="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded border border-white/10 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </div>
+                <span class="text-gray-500 text-sm">© 2026 VisionKey. All rights reserved.</span>
+            </div>
+            <div class="flex gap-6 text-sm text-gray-500">
+                <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                <a href="#" class="hover:text-white transition-colors">Terms</a>
+                <a href="#" class="hover:text-white transition-colors">Contact</a>
             </div>
         </div>
     </footer>
