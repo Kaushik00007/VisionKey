@@ -129,17 +129,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const activeDownloadsSection = document.getElementById('active-downloads');
+    const downloadsList = document.getElementById('downloads-list');
+    const confirmDownloadBtn = document.getElementById('confirm-download-btn');
+    const closeDownload = document.getElementById('close-download');
+
+    let selectedFormatId = null;
+    let currentUrl = null;
+
+    closeDownload?.addEventListener('click', () => {
+        downloadSection.classList.add('hidden');
+    });
+
     getLinksBtn.addEventListener('click', async () => {
         const url = urlInput.value.trim();
         if (!url) { showError("Please enter a valid YouTube URL"); return; }
         
         hideError();
+        currentUrl = url;
         resultsSection.classList.add('hidden');
         emptyState.classList.add('hidden');
         downloadSection.classList.add('hidden');
         
         const originalText = getLinksBtn.innerHTML;
-        getLinksBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div><span>...</span>';
+        getLinksBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>';
         getLinksBtn.disabled = true;
 
         try {
@@ -149,23 +162,40 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!response.ok) throw new Error(data.detail || 'Failed to fetch video info');
             
-            downloadTitle.textContent = data.data.title;
             downloadOptions.innerHTML = '';
             
-            data.data.formats.forEach(f => {
-                const btn = document.createElement('button');
-                btn.className = 'flex flex-col items-center justify-center p-4 bg-white/5 hover:bg-indigo-500/20 border border-white/10 hover:border-indigo-500/50 rounded-xl transition-all group';
-                btn.innerHTML = `
-                    <span class="font-bold text-lg text-white group-hover:text-indigo-300">${f.resolution}</span>
-                    <span class="text-xs text-slate-400 mt-1">${f.size}</span>
+            data.data.formats.forEach((f, idx) => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl cursor-pointer border border-transparent transition-all group';
+                
+                // Add "Selected" state handling
+                label.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-purple/20 transition-colors">
+                            <svg class="w-6 h-6 text-slate-400 group-hover:text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <div class="font-bold text-white">${f.height >= 720 ? 'High quality' : 'Standard quality'} (${f.resolution})</div>
+                            <div class="text-xs text-slate-500">${f.height >= 720 ? 'Clear view and quick play' : 'Normal quality for quick play'}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-slate-400">${f.size}</span>
+                        <input type="radio" name="format" value="${f.format_id}" ${idx === 0 ? 'checked' : ''} class="w-5 h-5 accent-brand-purple">
+                    </div>
                 `;
-                btn.onclick = () => {
-                    window.location.href = `/download-video?url=${encodeURIComponent(url)}&format_id=${f.format_id}`;
+                
+                if (idx === 0) selectedFormatId = f.format_id;
+                
+                label.onclick = () => {
+                    selectedFormatId = f.format_id;
                 };
-                downloadOptions.appendChild(btn);
+                
+                downloadOptions.appendChild(label);
             });
             
             downloadSection.classList.remove('hidden');
+            downloadSection.scrollIntoView({ behavior: 'smooth' });
         } catch (error) {
             showError(error.message);
         } finally {
@@ -174,9 +204,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    confirmDownloadBtn.addEventListener('click', async () => {
+        if (!selectedFormatId || !currentUrl) return;
+        
+        downloadSection.classList.add('hidden');
+        activeDownloadsSection.classList.remove('hidden');
+        
+        try {
+            const startResponse = await fetch(`/start-download?url=${encodeURIComponent(currentUrl)}&format_id=${selectedFormatId}`);
+            const startData = await startResponse.json();
+            const taskId = startData.task_id;
+            
+            createDownloadItem(taskId);
+            pollDownloadStatus(taskId);
+            
+        } catch (error) {
+            showError("Failed to start download");
+        }
+    });
+
+    function createDownloadItem(taskId) {
+        const item = document.createElement('div');
+        item.id = `task-${taskId}`;
+        item.className = 'bg-zinc-900 border border-white/5 p-4 rounded-2xl flex items-center gap-4';
+        item.innerHTML = `
+            <div class="w-16 h-16 bg-white/5 rounded-xl overflow-hidden flex-shrink-0 relative">
+                <img id="thumb-${taskId}" src="" class="w-full h-full object-cover hidden">
+                <div id="placeholder-${taskId}" class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                </div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div id="title-${taskId}" class="text-sm font-bold text-white truncate mb-1">Preparing download...</div>
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div id="progress-bar-${taskId}" class="h-full bg-brand-purple transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <span id="percent-${taskId}" class="text-[10px] font-bold text-slate-500 w-8">0%</span>
+                </div>
+                <div class="flex justify-between items-center text-[10px] font-medium text-slate-500">
+                    <span id="speed-${taskId}">0 KB/s</span>
+                    <span id="status-${taskId}">Starting...</span>
+                </div>
+            </div>
+        `;
+        downloadsList.prepend(item);
+    }
+
+    async function pollDownloadStatus(taskId) {
+        const poll = setInterval(async () => {
+            try {
+                const response = await fetch(`/download-status/${taskId}`);
+                const data = await response.json();
+                
+                const progressBar = document.getElementById(`progress-bar-${taskId}`);
+                const percentLabel = document.getElementById(`percent-${taskId}`);
+                const speedLabel = document.getElementById(`speed-${taskId}`);
+                const statusLabel = document.getElementById(`status-${taskId}`);
+                const titleLabel = document.getElementById(`title-${taskId}`);
+                const thumbImg = document.getElementById(`thumb-${taskId}`);
+                const thumbPlaceholder = document.getElementById(`placeholder-${taskId}`);
+
+                if (data.title && data.title !== 'Loading...') {
+                    titleLabel.textContent = data.title;
+                }
+                
+                if (data.thumbnail && thumbImg.classList.contains('hidden')) {
+                    thumbImg.src = data.thumbnail;
+                    thumbImg.classList.remove('hidden');
+                    thumbPlaceholder.classList.add('hidden');
+                }
+
+                if (data.status === 'downloading' || data.status === 'processing' || data.status === 'finished') {
+                    const progress = parseFloat(data.progress) || 0;
+                    progressBar.style.width = `${progress}%`;
+                    percentLabel.textContent = `${Math.round(progress)}%`;
+                    speedLabel.textContent = data.speed;
+                    statusLabel.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                }
+
+                if (data.status === 'finished') {
+                    clearInterval(poll);
+                    statusLabel.textContent = 'Completed';
+                    statusLabel.classList.add('text-emerald-400');
+                    progressBar.classList.replace('bg-brand-purple', 'bg-emerald-500');
+                    
+                    // Trigger download
+                    window.location.href = `/get-file/${taskId}`;
+                }
+
+                if (data.status === 'error') {
+                    clearInterval(poll);
+                    statusLabel.textContent = 'Error';
+                    statusLabel.classList.add('text-red-400');
+                    showError(data.error || "Download failed");
+                }
+            } catch (e) {
+                console.error("Polling error", e);
+            }
+        }, 1000);
+    }
+
     function showError(msg) {
         errorMessage.textContent = msg;
         errorMessage.classList.remove('hidden');
+        errorMessage.scrollIntoView({ behavior: 'smooth' });
     }
 
     function hideError() {
