@@ -98,32 +98,87 @@ async def get_video_info(request: Request, url: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get("/download-video")
-async def download_video_endpoint(url: str, format_id: str):
+from fastapi import BackgroundTasks
+import uuid
+import time
+
+# Global task store
+tasks = {}
+
+@app.get("/start-download")
+async def start_download(url: str, format_id: str, background_tasks: BackgroundTasks):
+    task_id = str(uuid.uuid4())
+    tasks[task_id] = {
+        "progress": "0%",
+        "speed": "0KB/s",
+        "status": "starting",
+        "title": "Loading...",
+        "filename": None,
+        "thumbnail": None
+    }
+    
+    background_tasks.add_task(run_download_task, task_id, url, format_id)
+    return {"task_id": task_id}
+
+@app.get("/download-status/{task_id}")
+async def get_download_status(task_id: str):
+    if task_id not in tasks:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return tasks[task_id]
+
+@app.get("/get-file/{task_id}")
+async def get_file(task_id: str):
+    if task_id not in tasks or tasks[task_id]["status"] != "finished":
+        raise HTTPException(status_code=400, detail="File not ready")
+    
+    filename = tasks[task_id]["filename"]
+    title = tasks[task_id]["title"]
+    safe_title = "".join(c for c in title if c.isalnum() or c in " -_").strip()
+    return FileResponse(filename, filename=f"{safe_title}.mp4", media_type='video/mp4')
+
+def run_download_task(task_id: str, url: str, format_id: str):
     import yt_dlp
-    import uuid
-    def download():
-        video_id = str(uuid.uuid4())
-        output_path = os.path.join(config.VIDEOS_DIR, f"dl_{video_id}.mp4")
-        ydl_opts = {
-            'format': f"{format_id}+bestaudio[ext=m4a]/best[ext=mp4]/best",
-            'outtmpl': output_path,
-            'quiet': True,
-            'merge_output_format': 'mp4'
-        }
+    
+    def progress_hook(d):
+        if d['status'] == 'downloading':
+            p = d.get('_percent_str', '0%')
+            s = d.get('_speed_str', '0KB/s')
+            tasks[task_id].update({
+                "progress": p,
+                "speed": s,
+                "status": "downloading"
+            })
+        elif d['status'] == 'finished':
+            tasks[task_id]["status"] = "processing"
+
+    video_uuid = str(uuid.uuid4())
+    output_path = os.path.join(config.VIDEOS_DIR, f"dl_{video_uuid}.mp4")
+    
+    ydl_opts = {
+        'format': f"{format_id}+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        'outtmpl': output_path,
+        'quiet': True,
+        'merge_output_format': 'mp4',
+        'progress_hooks': [progress_hook],
+    }
+    
+    try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
             if not filename.endswith('.mp4'):
                 filename = filename.rsplit('.', 1)[0] + '.mp4'
-            return filename, info.get('title', 'video')
             
-    try:
-        filename, title = await run_in_threadpool(download)
-        safe_title = "".join(c for c in title if c.isalnum() or c in " -_").strip()
-        return FileResponse(filename, filename=f"{safe_title}.mp4", media_type='video/mp4')
+            tasks[task_id].update({
+                "status": "finished",
+                "filename": filename,
+                "title": info.get('title', 'video'),
+                "thumbnail": info.get('thumbnail')
+            })
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Task {task_id} failed: {e}")
+        tasks[task_id]["status"] = "error"
+        tasks[task_id]["error"] = str(e)
 
 @app.get("/")
 async def serve_frontend():
