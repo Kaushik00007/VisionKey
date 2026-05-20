@@ -11,11 +11,19 @@ def download_video(url: str, video_id: str) -> str:
     output_path = os.path.join(config.VIDEOS_DIR, f"{video_id}.mp4")
     
     ydl_opts = {
-        'format': 'bestvideo[ext=mp4][vcodec^=avc][height<=720]+bestaudio[ext=m4a]/best[ext=mp4][vcodec^=avc]/best',
+        'format': 'bv*[vcodec^=avc1]+ba/b',
         'outtmpl': output_path,
         'noplaylist': True,
         'quiet': True,
         'no_warnings': True,
+        'cookiefile': 'cookies.txt',
+        'extractor_args': {'youtube': {'player_client': ['default', '-web_safari']}},
+        'remote_components': ['ejs:github'],
+        'merge_output_format': 'mp4',
+        'socket_timeout': 60,
+        'retries': float('inf'),
+        'retry_sleep_functions': {'http': 10, 'fragment': 10},
+        'keepvideo': True,
     }
     
     try:
