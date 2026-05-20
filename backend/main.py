@@ -69,7 +69,16 @@ async def health_check():
 async def get_video_info(request: Request, url: str):
     import yt_dlp
     def fetch_info():
-        ydl_opts = {'quiet': True, 'no_warnings': True}
+        ydl_opts = {
+            'quiet': True, 
+            'no_warnings': True,
+            'cookiefile': 'cookies.txt',
+            'extractor_args': {'youtube': {'player_client': ['default', '-web_safari']}},
+            'remote_components': ['ejs:github'],
+            'socket_timeout': 60,
+            'retries': float('inf'),
+            'retry_sleep_functions': {'http': 10, 'fragment': 10},
+        }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             formats = info.get('formats', [])
@@ -160,6 +169,12 @@ def run_download_task(task_id: str, url: str, format_id: str):
         'quiet': True,
         'merge_output_format': 'mp4',
         'progress_hooks': [progress_hook],
+        'cookiefile': 'cookies.txt',
+        'extractor_args': {'youtube': {'player_client': ['default', '-web_safari']}},
+        'remote_components': ['ejs:github'],
+        'socket_timeout': 60,
+        'retries': float('inf'),
+        'retry_sleep_functions': {'http': 10, 'fragment': 10},
     }
     
     try:
